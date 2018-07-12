@@ -1,36 +1,51 @@
 version: '2'
 services:
-    zipcodesLogin:
-        image: endimion13/eidas-gr-isswebapp:1.9
+    smartClassApp:
+        container_name: smartClassApp
+        image: endimion13/eidas-gr-smartclass:0.8.19
+        network_mode: "host"
+        expose:
+            - 9090
         ports:
-          - 9091:8090
+            - 9090:9090
         environment:
-           - EIDAS_PROPERTIES=CurrentFamilyName,CurrentGivenName,DateOfBirth,PersonIdentifier
-           - SP_FAIL_PAGE=http://212.205.82.117:9095/error
-           - SP_SUCCESS_PAGE=http://212.205.82.117:9095/success
-           - SP_LOGO=http://www.elta.gr/Portals/0/elta.jpg
-           - ISS_URL=http://212.205.82.117:8080/ISS2/ValidateToken
-           - ISS_PRE_URL=http://212.205.82.117:8080/ISS2/ValidateToken
-           - SP_ID=sp1
-           - SP_SECRET=secret
-           - AUTH_DURATION=3800
-           - UAEGEAN_LOGIN=false
-           - SP_SECRET=secret
-           # - CLIENT_ID=linkedinClientId
-           # - REDIRECT_URI=http://eideusmartclass.aegean.gr:9091/linkedInResponse
-           # - LINKED_IN_SECRET=linkeinsecret
-           - LINKED_IN=false
-           - HTTP_HEADER=false
-           - ASYNC_SIGNATURE=true
-           - SP_JWT_CERT=/certificates/keystore.jks 
-           - STORE_PASS=keystorepass
-           - KEY_PASS=selfsignedpass
-           - CERT_ALIAS=selfsigned
-           - URL_ENCODED=true
-           - URL_PREFIX=/eidas
-           - SP_SERVER=http://testsp.com
-           - UAEGEAN_AP=http://eidasiss.aegean.gr:8081/ISS2/ldap.jsp
+            - KEY=secret
+            - RASPBERRY_URL=http://test.com
+            - RASPBERRY_CLOSE_ROOM=closeroom
+            - AD_MICROSERV=http://eideusmartclass.aegean.gr/ad/v2
+            - LOGIN_URL=http://eideusmartclass.aegean.gr/eidasLogin/login
+            
+    
+    loginWebApp:
+       image: endimion13/eidas-gr-isswebapp:1.8.6.0
+       ports:
+         - 9091:8090
+       environment:
+         - EIDAS_PROPERTIES=CurrentFamilyName,CurrentGivenName,DateOfBirth,PersonIdentifier
+         - SP_FAIL_PAGE=http://eideusmartclass.aegean.gr:9091/authFail
+         - SP_SUCCESS_PAGE=http://eideusmartclass.aegean.gr/eIDASSuccess
+         - SP_LOGO=/img/logo2.png
+         - ISS_URL=https://eidasiss.aegean.gr:8081/ISS2/ValidateToken
+         - ISS_PRE_URL=https://eidasiss.aegean.gr:8081/ISS2/ValidateToken
+         - SP_SERVER=http://eideusmartclass.aegean.gr
+         - SP_ID=sp1
+         - SP_SECRET=secret
+         - AUTH_DURATION=43800
+         - UAEGEAN_LOGIN=true
+         - CLIENT_ID=867kszvon99qp4
+         - REDIRECT_URI=http://eideusmartclass.aegean.gr:9091/linkedInResponse
+         - LINKED_IN_SECRET=7hrWS3oDQlhFEXvQ  
+         - LINKED_IN=true
+         - URL_PREFIX=/eidasLogin
+         - UAEGEAN_AP=https://eidasiss.aegean.gr:8081/ISS2/ldap.jsp
+       volumes:
+         - ./webappConfig:/webappConfig
 
-        volumes:
-           - /webappConfig:/webappConfig
-           - /zipcodeCertificates:/certificates
+
+    adMicroServ:
+       image: endimion13/ad-micro-service:0.5.6
+       ports:
+           - 8000:8000
+       environment:
+           - KEY=secret
+
